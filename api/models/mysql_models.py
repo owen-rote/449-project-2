@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Float
 from config import engine
 from sqlalchemy.ext.declarative import declarative_base
 
+# SQLAlchemy models to define how data is stored in MySQL
+
 Base = declarative_base()
 
 

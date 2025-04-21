@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 
+# Pydantic schemas for sending/recieving MySQL data
+
 
 class LocationCreate(BaseModel):
     name: str

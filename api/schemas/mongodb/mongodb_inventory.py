@@ -2,10 +2,12 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from bson import ObjectId
 
+# Pydantic schemas for sending/recieving MongoDB data
 
-# Custom types to handle ObjectID in MongoDB
-# This allows Pydantic to correctly serialize it as a string
+
 class PyObjectId(ObjectId):
+    # Custom types to handle ObjectID in MongoDB
+    # This allows Pydantic to correctly serialize it as a string
     @classmethod
     def __get_validators__(cls):
         # Make sure the ObjectID is valid

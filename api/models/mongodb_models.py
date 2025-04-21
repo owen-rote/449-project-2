@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from typing import Optional
 from bson import ObjectId
 
+# Pydantic database models to define how data is stored in MongoDB
+
 
 class LocationMongo(BaseModel):
     id: Optional[str]  # ObjectId uses string
