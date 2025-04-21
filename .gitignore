@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+
+# virtualenv
+venv/
+env/
+.env/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Test and coverage reports
+.tox/
+.nox/
+.coverage
+.hypothesis/
+
+# MySQL
+*.sql
+*.sql.gz
+
+# Logs
+*.log
+
+# .env files for secrets
+.env
