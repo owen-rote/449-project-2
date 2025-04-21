@@ -15,3 +15,12 @@ CREATE/UPDATE/DELETE operations create identical entries, one on MySQL and one o
 READ operations will allow you to choose, read from mongo or mysql
 
 Should user data/logins be stored in the same way? When logging in, should it check the mysql db or mongo?
+
+## Admin Privilages
+Full CRUD on all entities \
+Add/Remove normal users \
+
+## User Privilages
+Mostly read only \
+Perhaps updating only some fields such as inventory count \
+No deletes

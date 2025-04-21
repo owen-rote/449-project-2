@@ -3,9 +3,13 @@ from typing import Optional
 from bson import ObjectId
 
 
+# Custom types to handle ObjectID in MongoDB
+# This allows Pydantic to correctly serialize it as a string
 class PyObjectId(ObjectId):
     @classmethod
     def __get_validators__(cls):
+        # Make sure the ObjectID is valid
+
         yield cls.validate
 
     @classmethod
@@ -36,6 +40,7 @@ class LocationRead(BaseModel):
     capacity: int
 
     class Config:
+        # Config for handling ObjectID
         allow_population_by_field_name = True
         json_encoders = {ObjectId: str}
         arbitrary_types_allowed = True

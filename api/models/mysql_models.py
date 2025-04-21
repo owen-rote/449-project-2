@@ -21,9 +21,8 @@ class InventoryMySQL(Base):
 
     inventory_id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
-    location_id = Column(
-        Integer, ForeignKey("location.location_id"), nullable=False
-    )  # Link to inventory
+    # Link to location
+    location_id = Column(Integer, ForeignKey("location.location_id"), nullable=False)
     quantity = Column(Integer, nullable=False)
     description = Column(String(255), nullable=False)
     price = Column(Float, nullable=False)
