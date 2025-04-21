@@ -4,7 +4,7 @@ from typing import Optional
 
 class InventoryCreate(BaseModel):
     name: str
-    location_id: int  # Validation is done in the endpoint
+    location_id: int  # Location validation is done in the endpoint
     quantity: int = Field(..., ge=0)
     description: str
     price: float = Field(..., ge=0)
