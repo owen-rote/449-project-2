@@ -17,16 +17,18 @@ class LocationMySQL(Base):
 
 
 class InventoryMySQL(Base):
-  __tablename__ = "inventory"
+    __tablename__ = "inventory"
 
-  inventory_id = Column(Integer, primary_key=True, index=True)
-  name = Column(String(255), nullable=False)
-  location_id = Column(Integer, ForeignKey("location.location_id"), nullable=False)  # Link to inventory
-  quantity = Column(Integer, nullable=False)
-  description = Column(String(255), nullable=False)
-  price = Column(Float, nullable=False)
-  width = Column(Float, nullable=False)
-  prescription_avail = Column(Boolean, nullable=False)
-  tinted = Column(Boolean, nullable=False)
-  polarized = Column(Boolean, nullable=False)
-  anti_glare = Column(Boolean, nullable=False)
+    inventory_id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    location_id = Column(
+        Integer, ForeignKey("location.location_id"), nullable=False
+    )  # Link to inventory
+    quantity = Column(Integer, nullable=False)
+    description = Column(String(255), nullable=False)
+    price = Column(Float, nullable=False)
+    width = Column(Float, nullable=False)
+    prescription_avail = Column(Boolean, nullable=False)
+    tinted = Column(Boolean, nullable=False)
+    polarized = Column(Boolean, nullable=False)
+    anti_glare = Column(Boolean, nullable=False)

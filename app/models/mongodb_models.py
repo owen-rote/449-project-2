@@ -2,8 +2,9 @@ from pydantic import BaseModel
 from typing import Optional
 from bson import ObjectId
 
+
 class LocationMongo(BaseModel):
-    id: Optional[str] # ObjectId uses string
+    id: Optional[str]  # ObjectId uses string
     name: str
     address: str
     state: str = None
@@ -12,9 +13,8 @@ class LocationMongo(BaseModel):
 
     class Config:
         # Maps to the 'id' field in the response
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
+
 
 class InventoryMongo(BaseModel):
     id: Optional[str]  # ObjectId uses string
@@ -31,6 +31,4 @@ class InventoryMongo(BaseModel):
 
     # Tells pydantic to use strings when serializing ObjectId
     class Config:
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
