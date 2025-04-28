@@ -18,13 +18,10 @@ Registering users and logging in will only use mysql.
 
 ## Admin Privilages
 Full CRUD on all entities \
-Add/Remove normal users \
 
 ## User Privilages
-Mostly read only \
-Perhaps updating only some fields such as inventory count \
-No deletes
+Full CRUD on ONLY entities that THEY create. \
+Each entity will also store the user ID of the creator.
 
 
-slides?
 user/admin stuff. does each user own their own entries?
