@@ -10,12 +10,13 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from schemas.mysql import user
+from models.mysql_models import UserMySql
 from config import get_db, SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 import os
 from pydantic import BaseModel
@@ -52,7 +53,7 @@ def get_password_hash(password):
 
 # Helper function to authenticate user
 def authenticate_user(db: Session, username: str, password: str):
-    user_db = db.query(user.User).filter(user.User.username == username).first()
+    user_db = db.query(UserMySql).filter(UserMySql.username == username).first()
     if not user_db:
         return False
     if not verify_password(password, user_db.hashed_password):
@@ -64,9 +65,9 @@ def authenticate_user(db: Session, username: str, password: str):
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -90,7 +91,7 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
     user_db = (
-        db.query(user.User).filter(user.User.username == token_data.username).first()
+        db.query(UserMySql).filter(user.User.username == token_data.username).first()
     )
     if user_db is None:
         raise credentials_exception
@@ -102,10 +103,9 @@ async def get_current_user(
 def register(user_create: user.UserCreate, db: Session = Depends(get_db)):
     # Check if username or email already exists
     db_user = (
-        db.query(user.User)
+        db.query(UserMySql)
         .filter(
-            (user.User.username == user_create.username)
-            | (user.User.email == user_create.email)
+            (UserMySql.username == user_create.username) | (UserMySql.email == user_create.email)
         )
         .first()
     )
@@ -117,7 +117,7 @@ def register(user_create: user.UserCreate, db: Session = Depends(get_db)):
 
     # Create new user with hashed password
     hashed_password = get_password_hash(user_create.password)
-    db_user = user.User(
+    db_user = UserMySql(
         username=user_create.username,
         email=user_create.email,
         hashed_password=hashed_password,
@@ -210,7 +210,9 @@ async def get_current_user_from_cookie(
         raise credentials_exception
 
     user_db = (
-        db.query(user.User).filter(user.User.username == token_data.username).first()
+        db.query(UserMySql)
+        .filter(user.UserCreate.username == token_data.username)
+        .first()
     )
     if user_db is None:
         raise credentials_exception

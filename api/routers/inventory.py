@@ -2,7 +2,7 @@ from fastapi import APIRouter, FastAPI, HTTPException, Depends
 from schemas.mongodb import mongodb_inventory
 from schemas.mysql import mysql_inventory
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/inventory")
 
 # Get all inventory entries
 

@@ -7,7 +7,7 @@ SECRET_KEY = "TODO"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-MYSQL_DATABASE_URL = "mysql+mysqlconnector://TODO/dbname"
+MYSQL_DATABASE_URL = "mysql+mysqlconnector://gvuser:1234@localhost/glassview"
 MONGO_DATABASE_URL = "mongodb://localhost:27017"
 MONGO_DB_NAME = "glassview-db"
 

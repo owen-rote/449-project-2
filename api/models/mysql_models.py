@@ -35,7 +35,7 @@ class InventoryMySQL(Base):
     anti_glare = Column(Boolean, nullable=False)
 
 
-class User(Base):
+class UserMySql(Base):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
