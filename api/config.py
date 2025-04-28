@@ -15,6 +15,15 @@ MONGO_DB_NAME = "glassview-db"
 engine = create_engine(MYSQL_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Dependency function for db connection
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 # MongoDB Connection ==========================================================
 mongo_client = MongoClient(MONGO_DATABASE_URL)
 mongo_db = mongo_client[MONGO_DB_NAME]

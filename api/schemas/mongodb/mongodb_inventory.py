@@ -5,6 +5,10 @@ from bson import ObjectId
 # Pydantic schemas for sending/recieving MongoDB data
 
 
+from pydantic import BaseModel
+from bson import ObjectId
+
+
 class PyObjectId(ObjectId):
     # Custom types to handle ObjectID in MongoDB
     # This allows Pydantic to correctly serialize it as a string
@@ -20,8 +24,10 @@ class PyObjectId(ObjectId):
         return ObjectId(v)
 
     @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+    def __get_pydantic_json_schema__(cls, **kwargs):
+        return {
+            "type": "string",  # Ensures it's serialized as a string in the schema
+        }
 
 
 class InventoryCreate(BaseModel):
