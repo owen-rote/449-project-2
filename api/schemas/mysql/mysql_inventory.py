@@ -32,7 +32,7 @@ class InventoryRead(BaseModel):
 
     # Makes fastAPI auto-convert sqlalchemy models to schemas
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class InventoryUpdate(BaseModel):

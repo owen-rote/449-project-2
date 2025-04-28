@@ -24,3 +24,7 @@ Add/Remove normal users \
 Mostly read only \
 Perhaps updating only some fields such as inventory count \
 No deletes
+
+
+slides?
+user/admin stuff. does each user own their own entries?

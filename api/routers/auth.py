@@ -1,12 +1,4 @@
-from fastapi import (
-    APIRouter,
-    FastAPI,
-    HTTPException,
-    Depends,
-    Response,
-    Cookie,
-    Request,
-)
+from fastapi import APIRouter, HTTPException, Depends, Response, Cookie
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from schemas.mysql import user
@@ -18,13 +10,12 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-import os
 from pydantic import BaseModel
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# OAuth2 scheme for token authentication
+# OAuth2 scheme for token authentication - used for Swagger UI
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 router = APIRouter(prefix="/auth")
@@ -41,71 +32,88 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 
-# Helper function to verify password
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-# Helper function to hash password
 def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-# Helper function to authenticate user
 def authenticate_user(db: Session, username: str, password: str):
     user_db = db.query(UserMySql).filter(UserMySql.username == username).first()
-    if not user_db:
-        return False
-    if not verify_password(password, user_db.hashed_password):
+    if not user_db or not verify_password(password, user_db.hashed_password):
         return False
     return user_db
 
 
-# Helper function to create access token
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + (
+        expires_delta
+        if expires_delta
+        else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# Get current user from token
-async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+# Single function to validate JWT token (from either cookie or Bearer header)
+def get_token_data(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            return None
+        return TokenData(username=username)
+    except JWTError:
+        return None
+
+
+# Dependency that checks both cookie and header
+def get_current_user(
+    db: Session = Depends(get_db),
+    token: Optional[str] = Depends(oauth2_scheme),
+    session_token: Optional[str] = Cookie(None),
 ):
     credentials_exception = HTTPException(
         status_code=401,
-        detail="Could not validate credentials",
+        detail="Not authenticated. Please log in.",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
+
+    # Try to get token from header first, then from cookie
+    auth_token = token or session_token
+    if not auth_token:
         raise credentials_exception
+
+    token_data = get_token_data(auth_token)
+    if token_data is None:
+        raise credentials_exception
+
     user_db = (
-        db.query(UserMySql).filter(user.User.username == token_data.username).first()
+        db.query(UserMySql).filter(UserMySql.username == token_data.username).first()
     )
     if user_db is None:
         raise credentials_exception
+
     return user_db
 
 
-# Register endpoint
+def get_admin_user(current_user: UserMySql = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required.")
+    return current_user
+
+
 @router.post("/register", response_model=user.UserRead)
 def register(user_create: user.UserCreate, db: Session = Depends(get_db)):
     # Check if username or email already exists
     db_user = (
         db.query(UserMySql)
         .filter(
-            (UserMySql.username == user_create.username) | (UserMySql.email == user_create.email)
+            (UserMySql.username == user_create.username)
+            | (UserMySql.email == user_create.email)
         )
         .first()
     )
@@ -116,11 +124,10 @@ def register(user_create: user.UserCreate, db: Session = Depends(get_db)):
         )
 
     # Create new user with hashed password
-    hashed_password = get_password_hash(user_create.password)
     db_user = UserMySql(
         username=user_create.username,
         email=user_create.email,
-        hashed_password=hashed_password,
+        hashed_password=get_password_hash(user_create.password),
     )
 
     try:
@@ -133,10 +140,11 @@ def register(user_create: user.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Registration failed")
 
 
-# Login endpoint
 @router.post("/login", response_model=Token)
-async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+def login(
+    response: Response,  # Add response parameter
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
 ):
     user_db = authenticate_user(db, form_data.username, form_data.password)
     if not user_db:
@@ -146,15 +154,10 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Create access token with expiration time
+    # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user_db.username}, expires_delta=access_token_expires
-    )
-
-    # Create response with token in cookies
-    response = JSONResponse(
-        content={"access_token": access_token, "token_type": "bearer"}
     )
 
     # Set secure httpOnly cookie
@@ -167,53 +170,16 @@ async def login(
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
 
-    return response
+    # Return token in response body as well (for API clients)
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
-# Logout endpoint
 @router.post("/logout")
-async def logout(response: Response):
-    response = JSONResponse(content={"message": "Logged out successfully"})
-    # Clear the session cookie
+def logout(response: Response):
     response.delete_cookie(key="session_token")
-    return response
+    return {"message": "Logged out successfully"}
 
 
-# Get current user profile
 @router.get("/me", response_model=user.UserRead)
-async def get_current_user_profile(
-    current_user: user.UserRead = Depends(get_current_user),
-):
+def get_current_user_profile(current_user: UserMySql = Depends(get_current_user)):
     return current_user
-
-
-# Session validation from cookie
-async def get_current_user_from_cookie(
-    session_token: Optional[str] = Cookie(None), db: Session = Depends(get_db)
-):
-    if not session_token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    try:
-        payload = jwt.decode(session_token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-
-    user_db = (
-        db.query(UserMySql)
-        .filter(user.UserCreate.username == token_data.username)
-        .first()
-    )
-    if user_db is None:
-        raise credentials_exception
-    return user_db

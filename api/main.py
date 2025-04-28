@@ -8,8 +8,8 @@ app = FastAPI(title="GlassView")
 # Generate the tables of the db automatically
 Base.metadata.create_all(bind=engine)
 
-app.include_router(inventory.router, prefix="/inventory", tags=["inventory"])
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(inventory.router, tags=["Inventory"])
+app.include_router(auth.router, tags=["Authentication"])
 
 
 @app.get("/")
