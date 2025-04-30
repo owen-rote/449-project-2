@@ -9,7 +9,6 @@ class PyObjectId(ObjectId):
     # This allows Pydantic to correctly serialize it as a string
     @classmethod
     def __get_validators__(cls):
-        # Make sure the ObjectID is valid
         yield cls.validate
 
     @classmethod
@@ -20,8 +19,9 @@ class PyObjectId(ObjectId):
 
     @classmethod
     def __get_pydantic_json_schema__(cls, **kwargs):
+        # Return a schema indicating that this type should be a string
         return {
-            "type": "string",  # Ensures it's serialized as a string in the schema
+            "type": "string",
         }
 
 

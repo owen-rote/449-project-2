@@ -9,6 +9,9 @@ app = FastAPI(title="GlassView")
 Base.metadata.create_all(bind=engine)
 
 app.include_router(inventory.router, tags=["Inventory"])
+
+app.include_router(location.router, tags=["Location"])
+
 app.include_router(auth.router, tags=["Authentication"])
 
 

@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from pymongo.collection import Collection
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -27,3 +28,6 @@ def get_db():
 # MongoDB Connection ==========================================================
 mongo_client = MongoClient(MONGO_DATABASE_URL)
 mongo_db = mongo_client[MONGO_DB_NAME]
+
+def get_mongo_location_collection() -> Collection:
+    return mongo_db["location"]

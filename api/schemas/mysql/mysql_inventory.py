@@ -18,7 +18,7 @@ class InventoryCreate(BaseModel):
 
 
 class InventoryRead(BaseModel):
-    id: int
+    inventory_id: int = Field(alias='location_id')
     name: str
     location_id: int
     quantity: int

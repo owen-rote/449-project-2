@@ -13,6 +13,8 @@ from config import get_db
 
 router = APIRouter(prefix="/inventory")
 
+# Post inventory entry
+
 
 # Get all inventory entries
 @router.get("/", response_model=List[mysql_inventory.InventoryRead])

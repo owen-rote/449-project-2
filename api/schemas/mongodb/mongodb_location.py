@@ -7,27 +7,7 @@ from bson import ObjectId
 
 from pydantic import BaseModel
 from bson import ObjectId
-
-
-class PyObjectId(ObjectId):
-    # Custom types to handle ObjectID in MongoDB
-    # This allows Pydantic to correctly serialize it as a string
-    @classmethod
-    def __get_validators__(cls):
-        # Make sure the ObjectID is valid
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, **kwargs):
-        return {
-            "type": "string",  # Ensures it's serialized as a string in the schema
-        }
+from schemas.mongodb.mongodb_inventory import PyObjectId
 
 
 class LocationCreate(BaseModel):

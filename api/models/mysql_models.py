@@ -38,7 +38,7 @@ class InventoryMySQL(Base):
 class UserMySql(Base):
     __tablename__ = "user"
 
-    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, primary_key=True)
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(120), unique=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)

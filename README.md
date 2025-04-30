@@ -1,4 +1,4 @@
-# How to run (Nothing to run yet)
+# How to run (Currently Working)
 
 **1.** `python -m venv venv` \
 **2.** `.\venv\Scripts\activate` \

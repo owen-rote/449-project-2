@@ -4,16 +4,11 @@ from typing import Optional
 # Pydantic schemas for sending/recieving MySQL data
 
 
-class LocationCreate(BaseModel):
-    name: str
-    address: str
-    state: str = Field(..., min_length=2, max_length=2)
-    zip_code: int = Field(..., ge=10000, le=99999)
-    capacity: int = Field(..., ge=0)
+# LocationCreate is identical and reusable from schemas.mongodb
 
 
 class LocationRead(BaseModel):
-    id: int
+    location_id: int
     name: str
     address: str
     state: str
