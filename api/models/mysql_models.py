@@ -33,6 +33,7 @@ class InventoryMySQL(Base):
     tinted = Column(Boolean, nullable=False)
     polarized = Column(Boolean, nullable=False)
     anti_glare = Column(Boolean, nullable=False)
+    user_id = Column(Integer, ForeignKey("user.user_id"), nullable=False)
 
 
 class UserMySql(Base):

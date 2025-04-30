@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from bson import ObjectId
+from schemas.mongodb.mongodb_inventory import PyObjectId
 
 # Pydantic database models to define how data is stored in MongoDB
 
@@ -30,6 +31,7 @@ class InventoryMongo(BaseModel):
     tinted: bool
     polarized: bool
     anti_glare: bool
+    user_id: PyObjectId = Field(...)
 
     # Tells pydantic to use strings when serializing ObjectId
     class Config:
