@@ -8,7 +8,7 @@ SECRET_KEY = "TODO"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-MYSQL_DATABASE_URL = "mysql+mysqlconnector://gvuser:1234@localhost/glassview"
+MYSQL_DATABASE_URL = "mysql+mysqlconnector://root:ForTheCollege654@localhost/glassview"
 MONGO_DATABASE_URL = "mongodb://localhost:27017"
 MONGO_DB_NAME = "glassview-db"
 
@@ -31,3 +31,6 @@ mongo_db = mongo_client[MONGO_DB_NAME]
 
 def get_mongo_location_collection() -> Collection:
     return mongo_db["location"]
+    
+def get_mongo_inventory_collection() -> Collection:
+    return mongo_db["inventory"]

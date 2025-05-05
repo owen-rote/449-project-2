@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Field
+from pydantic import GetJsonSchemaHandler
+from pydantic_core import core_schema
 from typing import Optional
 from bson import ObjectId
 
@@ -8,8 +10,11 @@ class PyObjectId(ObjectId):
     # Custom types to handle ObjectID in MongoDB
     # This allows Pydantic to correctly serialize it as a string
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(cls, _source_type, _handler: GetJsonSchemaHandler):
+        return core_schema.no_info_after_validator_function(
+            cls.validate,
+            core_schema.str_schema()
+        )
 
     @classmethod
     def validate(cls, v):
@@ -21,7 +26,7 @@ class PyObjectId(ObjectId):
     def __get_pydantic_json_schema__(cls, **kwargs):
         # Return a schema indicating that this type should be a string
         return {
-            "type": "string",
+            "type": "string"
         }
 
 
