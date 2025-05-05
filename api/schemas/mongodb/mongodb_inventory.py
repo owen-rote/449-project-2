@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from pydantic import GetJsonSchemaHandler
 from pydantic_core import core_schema
 from typing import Optional
@@ -28,6 +28,9 @@ class PyObjectId(ObjectId):
         return {
             "type": "string"
         }
+    
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type='string')
 
 
 class InventoryCreate(BaseModel):
@@ -55,6 +58,14 @@ class InventoryRead(BaseModel):
     tinted: bool
     polarized: bool
     anti_glare: bool
+
+    @field_validator('id', mode='before')
+    def validate_id(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
 
     class Config:
         # Config for handling ObjectID

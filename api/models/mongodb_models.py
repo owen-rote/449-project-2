@@ -31,7 +31,7 @@ class InventoryMongo(BaseModel):
     tinted: bool
     polarized: bool
     anti_glare: bool
-    user_id: PyObjectId = Field(...)
+    user_id: int
 
     # Tells pydantic to use strings when serializing ObjectId
     class Config:
