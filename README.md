@@ -1,3 +1,4 @@
+# 449 Project 2, Group 2
 # How to run (Currently Working)
 
 **1.** `python -m venv venv` \
@@ -23,5 +24,5 @@ Full CRUD on all entities \
 Full CRUD on ONLY entities that THEY create. \
 Each entity will also store the user ID of the creator.
 
-
-user/admin stuff. does each user own their own entries?
+# Authors
+Caleb Cassin, Owen Rotenberg, Devin Ngo, Ashton Yoshino, Jake Souza
