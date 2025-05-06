@@ -42,8 +42,8 @@ def get_all_inventory(
     return {'mongo':mongo_item, 'mysql':sql_inventory}
 
 # Get all inventory entries
-@router.get("/sql", response_model=List[mysql_inventory.InventoryRead])
-def get_all_inventory(
+@router.get("/mysql", response_model=List[mysql_inventory.InventoryRead])
+def get_all_inventory_sql(
     db: Session = Depends(get_db), 
     current_user=Depends(get_current_user)
 ):
@@ -54,8 +54,8 @@ def get_all_inventory(
             InventoryMySQL.user_id == current_user.user_id
             )
 
-@router.get("/mongo", response_model=List[mongodb_inventory.InventoryRead])
-def get_inventory_by_location(
+@router.get("/mongodb", response_model=List[mongodb_inventory.InventoryRead])
+def get_all_inventory_mongo(
     mongo: Collection = Depends(get_mongo_inventory_collection), current_user=Depends(get_current_user)
 ):
     if(current_user.role == "admin"):
@@ -65,8 +65,8 @@ def get_inventory_by_location(
             {"user_id": current_user.user_id})
 
 # Get inventory at location_id
-@router.get("/sql/by_location/{location_id}", response_model=List[mysql_inventory.InventoryRead])
-def get_inventory_by_location(
+@router.get("/mysql/by_location/{location_id}", response_model=List[mysql_inventory.InventoryRead])
+def get_inventory_by_location_sql(
     location_id: int,
     db: Session = Depends(get_db), current_user=Depends(get_current_user)
 ):
@@ -77,8 +77,8 @@ def get_inventory_by_location(
             InventoryMySQL.location_id == location_id,
             InventoryMySQL.user_id == current_user.user_id).all()
     
-@router.get("/mongo/by_location/{location_id}", response_model=List[mongodb_inventory.InventoryRead])
-def get_inventory_by_location(
+@router.get("/mongodb/by_location/{location_id}", response_model=List[mongodb_inventory.InventoryRead])
+def get_inventory_by_location_mongo(
     location_id: int,
     mongo: Collection = Depends(get_mongo_inventory_collection), current_user=Depends(get_current_user)
 ):
@@ -89,8 +89,8 @@ def get_inventory_by_location(
             {"location_id": location_id, "user_id": current_user.user_id})
 
 # Get inventory by inventory_id
-@router.get("/sql/{inventory_id}", response_model=mysql_inventory.InventoryRead)
-def get_inventory_by_location(
+@router.get("/mysql/{inventory_id}", response_model=mysql_inventory.InventoryRead)
+def get_inventory_sql(
     inventory_id: int,
     db: Session = Depends(get_db), current_user=Depends(get_current_user)
 ):
@@ -105,8 +105,8 @@ def get_inventory_by_location(
         raise HTTPException(status_code=404, detail="Not found")
     return obj
     
-@router.get("/mongo/{inventory_id}", response_model=mongodb_inventory.InventoryRead)
-def get_inventory_by_location(
+@router.get("/mongodb/{inventory_id}", response_model=mongodb_inventory.InventoryRead)
+def get_inventory_mongo(
     inventory_id: str,
     mongo: Collection = Depends(get_mongo_inventory_collection), current_user=Depends(get_current_user)
 ):
@@ -129,10 +129,10 @@ def get_inventory_by_location(
     raise HTTPException(status_code=404,detail="Not Found")
     
 # Edit inventory at certain location
-@router.put("/sql/{inventory_id}", response_model=mysql_inventory.InventoryRead)
-def get_all_inventory(
+@router.put("/mysql/{inventory_id}", response_model=mysql_inventory.InventoryRead)
+def put_inventory_sql(
     inventory_id: int,
-    inventory_item: mysql_inventory.InventoryCreate,
+    inventory_item: mysql_inventory.InventoryUpdate,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):  
@@ -151,10 +151,10 @@ def get_all_inventory(
         raise HTTPException(status_code=400, detail="Invalid Form")
     return item
 
-@router.put("/mongo/{inventory_id}", response_model=mongodb_inventory.InventoryRead)
-def get_all_inventory(
+@router.put("/mongodb/{inventory_id}", response_model=mongodb_inventory.InventoryRead)
+def put_inventory_mongo(
     inventory_id: str,
-    inventory_item: mongodb_inventory.InventoryCreate,
+    inventory_item: mongodb_inventory.InventoryUpdate,
     mongo: Collection = Depends(get_mongo_inventory_collection),
     current_user=Depends(get_current_user)
 ):  
@@ -177,8 +177,8 @@ def get_all_inventory(
     return item
     
 # Delete inventory at certain location
-@router.delete("/sql/{inventory_id}", response_model=Dict[str,str])
-def get_all_inventory(
+@router.delete("/mysql/{inventory_id}", response_model=Dict[str,str])
+def delete_inventory_sql(
     inventory_id: int,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
@@ -196,8 +196,8 @@ def get_all_inventory(
         raise HTTPException(status_code=400, detail="Invalid Form")
     return {"message":"deleted successfully"}
 
-@router.delete("/mongo/{inventory_id}", response_model=Dict[str,str])
-def get_all_inventory(
+@router.delete("/mongodb/{inventory_id}", response_model=Dict[str,str])
+def delete_inventory_mongo(
     inventory_id: str,
     mongo: Collection = Depends(get_mongo_inventory_collection),
     current_user=Depends(get_current_user)

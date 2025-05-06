@@ -29,8 +29,8 @@ def get_db():
 mongo_client = MongoClient(MONGO_DATABASE_URL)
 mongo_db = mongo_client[MONGO_DB_NAME]
 
-mongo_db["inventory"].create_index({'location_id':1})
-mongo_db["location"].create_index({'user_id':1})
+mongo_db["inventory"].create_index({'user_id':1,'location_id':1})
+mongo_db["location"].create_index({'zip_code':1})
 
 def get_mongo_location_collection() -> Collection:
     return mongo_db["location"]

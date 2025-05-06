@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from bson import ObjectId
 
@@ -25,6 +25,14 @@ class LocationRead(BaseModel):
     state: str
     zip_code: int
     capacity: int
+
+    @field_validator('id', mode='before')
+    def validate_id(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
 
     class Config:
         # Config for handling ObjectID
