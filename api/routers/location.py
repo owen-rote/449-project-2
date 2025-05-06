@@ -1,6 +1,7 @@
+from bson import ObjectId
 from fastapi import APIRouter, FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-from typing import List
+from typing import Dict, List
 from pymongo.collection import Collection
 
 from schemas.mysql import mysql_location
@@ -31,21 +32,19 @@ def create_location(
     db.refresh(mysql_location)
 
     # Insert into MongoDB
-    mongo_collection.insert_one(location.dict())
+    mongo_doc = location.dict()
+    mongo_collection.insert_one(mongo_doc)
 
     return {"mysql_id": mysql_location.location_id, "mongodb": "inserted"}
 
 
 # Get all locations from MongoDB
-# @router.get("/mongodb", response_model=List[mongodb_location.LocationRead])
-# def get_all_locations_mongo(
-#     mongo_collection: Collection = Depends(get_mongo_location_collection),
-# ):
-#     locations = mongo_collection.find()  # Find all locations
-
-#     # Convert cursor to list and return as response
-#     return [mongodb_location.LocationRead(**location) for location in locations]
-
+@router.get("/mongodb", response_model=List[mongodb_location.LocationRead])
+def get_all_locations_mongo(
+    mongo_collection: Collection = Depends(get_mongo_location_collection),
+):
+    locations = mongo_collection.find()  # Find all locations
+    return [mongodb_location.LocationRead(location) for location in locations]
 
 # Get all locations from MySQL
 @router.get("/mysql", response_model=List[mysql_location.LocationRead])
@@ -55,9 +54,90 @@ def get_all_locations_mysql(db: Session = Depends(get_db)):
 
 
 # Get location by ID from MongoDB
+# @router.get("/mongodb/{location_id}", response_model=[mongodb_location.LocationRead])
+# def get_location_by_ID_mongodb(location_id: int, mongo_collection: Collection = Depends(get_mongo_location_collection)):
+#     location = None
+#     location = mongo_collection.find_one({"_id": ObjectId((str(location_id)))})
+#     if not location:
+#         raise HTTPException(
+#             status_code=404,
+#             detail="Location not found"
+#         )
+#     return location
+
 # Get location by ID from MySQL DB
+@router.get("/mysql/{location_id}", response_model=List[mysql_location.LocationRead])
+def get_location_by_ID_mysql(location_id: int, db: Session = Depends(get_db)):
+    location = db.query(LocationMySQL).filter_by(location_id=location_id).first()
+    if not location:
+        raise HTTPException(
+            status_code=404,
+            detail="Location not found"
+        )
+    
+    return List[location]
 
 
 # Edit a location
 
-# Delete a location
+@router.put("/mysql/{location_id}", response_model=mysql_location.LocationRead)
+def update_location(
+    location_id: int,
+    location_item: mysql_location.LocationUpdate,
+    db: Session = Depends(get_db),
+    current_user: UserMySql = Depends(get_admin_user)
+):
+    location = db.query(LocationMySQL).filter_by(location_id=location_id).first()
+    if not location:
+        raise HTTPException(
+            status_code=404, 
+            detail="Location not found"
+        )
+    if not current_user.role == "admin":
+        raise HTTPException(
+            status_code=401,
+            detail="Not Authorized"
+        )
+    
+    for key, value in location_item.model_dump().items():
+        setattr(location, key, value)
+
+    try:
+        db.commit()
+        db.refresh(location)
+    except:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid Form"
+        )
+    return location
+
+# # Delete a location
+@router.delete("/mysql/{location_id}", response_model=Dict[str, str])
+def delete_location(
+    location_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserMySql = Depends(get_admin_user)
+):
+    location = db.query(LocationMySQL).filter_by(location_id=location_id).first()
+    if not location:
+        raise HTTPException(
+            status_code=404,
+            detail="Location not found"
+            )
+
+    if not current_user.role == "admin":
+        raise HTTPException(
+            status_code=401, 
+            detail="Not Authorized"
+        )
+     
+    try:
+        db.delete(location)
+        db.commit()
+    except:
+        raise HTTPException(
+            status_code=400, 
+            detail="Invalid form"
+        )
+    return {"message": "Location sucessfully deleted"}
